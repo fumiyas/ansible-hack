@@ -1,0 +1,73 @@
+#!/bin/sh
+##
+## Ansible: "Best Practices: Directory Layout" creator
+## Copyright (c) SATOH Fumiyasu @ OSS Technology Corp., Japan
+##
+## License: GNU General Public License version 3
+##
+## References:
+##	* Best Practices — Ansible Documentation
+##	  https://docs.ansible.com/playbooks_best_practices.html#directory-layout
+##
+
+set -u
+set -e
+umask 0022
+
+d() {
+  mkdir -p "$1"
+}
+
+f() {
+  [ -f "$1" ] || touch "$1"
+}
+
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 DIRECTORY"
+  exit 1
+fi
+
+target="$1"; shift
+
+d "$target"
+cd "$target"
+
+d production				# inventory file for production servers
+d stage					# inventory file for stage environment
+
+d group_vars/
+: group_vars/group1			# here we assign variables to particular groups
+: group_vars/group2			# ""
+d host_vars/
+: group_vars/hostname1			# if systems need specific variables, put them here
+: group_vars/hostname2			# ""
+d library/				# if any custom modules, put them here (optional)
+d filter_plugins/			# if any custom filter plugins, put them here (optional)
+
+f site.yml				# master playbook
+: webservers.yml			# playbook for webserver tier
+: dbservers.yml				# playbook for dbserver tier
+
+: roles/				# this hierarchy represents a "role"
+d roles/common/tasks/			#
+f roles/common/tasks/main.yml		# tasks file can include smaller files if warranted
+d roles/common/handlers/		#
+f roles/common/handlers/main.yml	# handlers file
+d roles/common/templates/		# files for use with the template resource
+: roles/common/templates/ntp.conf.j2	# templates end in .j2
+d roles/common/files/			#
+: roles/common/files/bar.txt		# files for use with the copy resource
+: roles/common/files/foo.sh		# script files for use with the script resource
+d roles/common/vars/			#
+f roles/common/vars/main.yml		# variables associated with this role
+d roles/common/defaults/		#
+f roles/common/defaults/main.yml	# default lower priority variables for this role
+d roles/common/meta/			#
+f roles/common/meta/main.yml		# role dependencies
+
+: roles/webtier/			# same kind of structure as "common" was above, done for the webtier role
+: roles/monitoring/			# ""
+: roles/fooapp/				# ""
+
+exit 0
+
