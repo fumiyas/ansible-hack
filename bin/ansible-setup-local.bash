@@ -19,14 +19,15 @@ if [[ $ansible_root != /* ]]; then
   ansible_root="$PWD/$ansible_root"
 fi
 
+python="${python:-python}"
 python_modules=(
-  ansible==2.2.1.0
-  paramiko
-  pyyaml
-  jinja2
-  httplib2
-  six
-  pywinrm
+  ansible${ansible_version:+==$ansible_version}
+  paramiko${paramiko_version:+==$paramiko_version}
+  pyyaml${pyyaml_version:+==$pyyaml_version}
+  jinja2${jinja2_version:+==$jinja2_version}
+  httplib2${httplib2_version:+==$httplib2_version}
+  six${six_version:+==$six_version}
+  pywinrm${pywinrm_version:+==$pywinrm_version}
 )
 
 export PYTHONUSERBASE="$ansible_root"
@@ -35,7 +36,7 @@ export XDG_CACHE_HOME="$ansible_root/var/cache/xdg"
 mkdir -p "$ansible_root/bin" || exit 1
 cd "$ansible_root/bin" || exit 1
 wget --timestamping https://bootstrap.pypa.io/get-pip.py || exit 1
-python get-pip.py --user || exit 1
+"$python" get-pip.py --user || exit 1
 
 python_sitelib=$(echo "$ansible_root"/lib/python*/*)
 export PATH="$ansible_root/bin:$PATH"
