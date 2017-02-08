@@ -14,7 +14,13 @@ v() {
 }
 
 if [[ $# -ne 1 ]]; then
-  echo "Usage: $0 <SETUPDIR>"
+  echo "Usage: $0 <ANSIBLEDIR>"
+  echo
+  echo "Example to install the latest version:"
+  echo "  \$ $0 ~/ansible"
+  echo
+  echo "Example to install a specific version:"
+  echo "  \$ ansible_version=2.2.1.0 $0 ~/ansible"
   exit 1
 fi
 
