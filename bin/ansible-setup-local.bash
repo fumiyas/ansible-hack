@@ -18,9 +18,16 @@ if [[ $# -ne 1 ]]; then
   echo
   echo "Example to install the latest version:"
   echo "  \$ $0 ~/ansible"
+  echo "  ..."
+  echo "  \$ source ~/ansible/bin/env-setup"
+  echo "  \$ type ansible"
+  echo "  ansible is /home/yourname/ansible/bin/ansible"
+  echo "  \$ ansible localhost -m ping"
+  echo "  ..."
   echo
   echo "Example to install a specific version:"
   echo "  \$ ansible_version=2.2.1.0 $0 ~/ansible"
+  echo "  ..."
   exit 1
 fi
 
