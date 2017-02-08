@@ -30,6 +30,9 @@ python_modules=(
   pywinrm${pywinrm_version:+==$pywinrm_version}
 )
 
+## Setup pip
+## ======================================================================
+
 export PYTHONUSERBASE="$ansible_root"
 export XDG_CACHE_HOME="$ansible_root/var/cache/xdg"
 
@@ -38,17 +41,23 @@ cd "$ansible_root/bin" || exit 1
 wget --timestamping https://bootstrap.pypa.io/get-pip.py || exit 1
 "$python" get-pip.py --user || exit 1
 
+## Setup Ansible
+## ======================================================================
+
 python_sitelib=$(echo "$ansible_root"/lib/python*/*)
 export PATH="$ansible_root/bin:$PATH"
 export PYTHONPATH="$python_sitelib"
 
 pip install --user --ignore-installed "${python_modules[@]}" || exit 1
 
-cat <<EOF >env-setup
+## Create env-setup script
+## ======================================================================
+
+cat <<EOF >env-setup || exit 1
 ansible_root="$ansible_root"
 EOF
 
-cat <<'EOF' >>env-setup
+cat <<'EOF' >>env-setup || exit 1
 if [[ -n ${ZSH_VERSION-} ]]; then
   ansible_root=$(cd "${0%/*}/.." && pwd) || return 1
 elif [[ -n ${BASH_VERSION-} ]]; then
@@ -60,3 +69,5 @@ python_sitelib=$(echo "$ansible_root"/lib/python*/*)
 export PATH="$ansible_root/bin:$PATH"
 export PYTHONPATH="$python_sitelib"
 EOF
+
+exit 0
