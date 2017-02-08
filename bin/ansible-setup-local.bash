@@ -1,7 +1,9 @@
 #!/bin/bash
 ##
-## Setup local Ansible environment
-## Copyright (c) 2017 SATOH Fumiyasu @ OSSTechnology Corp., Japan
+## Ansible: Setup user's local Ansible environment
+## Copyright (c) 2017 SATOH Fumiyasu @ OSS Technology Corp., Japan
+##
+## License: GNU General Public License version 3
 ##
 
 set -u
