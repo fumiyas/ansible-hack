@@ -42,6 +42,13 @@ python_modules=(
   pywinrm${pywinrm_version:+==$pywinrm_version}
 )
 
+echo "Ansible directory: $ansible_root"
+echo "Python: $python"
+echo "Python modules:"
+for module in "${python_modules[@]}"; do
+  echo "  $module"
+done
+
 ## Check if required component to build modules exist
 ## ======================================================================
 
