@@ -9,10 +9,16 @@
 set -u
 umask 0022
 
+v() {
+  echo "$({ tput bold; tput smul; } 2>/dev/null)${0##*/}: $*$(tput sgr0 2>/dev/null)"
+}
+
 if [[ $# -ne 1 ]]; then
   echo "Usage: $0 <SETUPDIR>"
   exit 1
 fi
+
+v "Started."
 
 ansible_root="$1"; shift
 if [[ $ansible_root != /* ]]; then
@@ -30,6 +36,26 @@ python_modules=(
   pywinrm${pywinrm_version:+==$pywinrm_version}
 )
 
+## Check if required component to build modules exist
+## ======================================================================
+
+v "Checking C compiler to build binary modules ..."
+type gcc || type cc || exit 1
+
+if [[ -f /etc/os-release ]]; then
+  v "Checking packages to build binary modules ..."
+
+  eval "$(sed 's/^\([A-Z]\)/OS_\1/' /etc/os-release)" || exit 1
+  case "$OS_ID" in
+  debian|ubuntu)
+    dpkg -l libssl-dev libffi-dev libgmp-dev || exit 1
+    ;;
+  redhat|centos|fedora)
+    rpm -q openssl-devel libffi-devel gmp-devel || exit 1
+    ;;
+  esac
+fi
+
 ## Setup pip
 ## ======================================================================
 
@@ -38,7 +64,11 @@ export XDG_CACHE_HOME="$ansible_root/var/cache/xdg"
 
 mkdir -p "$ansible_root/bin" || exit 1
 cd "$ansible_root/bin" || exit 1
-wget --timestamping https://bootstrap.pypa.io/get-pip.py || exit 1
+
+v "Getting get-pip.py ..."
+wget --quiet --timestamping https://bootstrap.pypa.io/get-pip.py || exit 1
+
+v "Running get-pip.py ..."
 "$python" get-pip.py --user || exit 1
 
 ## Setup Ansible
@@ -48,6 +78,7 @@ python_sitelib=$(echo "$ansible_root"/lib/python*/*)
 export PATH="$ansible_root/bin:$PATH"
 export PYTHONPATH="$python_sitelib"
 
+v "Installing modules ..."
 pip install --user --ignore-installed "${python_modules[@]}" || exit 1
 
 ## Create env-setup script
@@ -70,4 +101,5 @@ export PATH="$ansible_root/bin:$PATH"
 export PYTHONPATH="$python_sitelib"
 EOF
 
+v "Done."
 exit 0
