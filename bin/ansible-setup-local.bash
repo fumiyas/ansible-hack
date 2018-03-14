@@ -1,7 +1,7 @@
 #!/bin/bash
 ##
 ## Ansible: Setup user's local Ansible environment
-## Copyright (c) 2017 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Copyright (c) 2017-2018 SATOH Fumiyasu @ OSS Technology Corp., Japan
 ##
 ## License: GNU General Public License version 3
 ##
@@ -62,18 +62,18 @@ echo "get-pip.py: $get_pip_url"
 ## ======================================================================
 
 v "Checking C compiler to build binary modules ..."
-type gcc || type cc || exit 1
+type gcc || type cc || exit $?
 
 if [[ -f /etc/os-release ]]; then
   v "Checking packages to build binary modules ..."
 
-  eval "$(sed 's/^\([A-Z]\)/OS_\1/' /etc/os-release)" || exit 1
+  eval "$(sed 's/^\([A-Z]\)/OS_\1/' /etc/os-release)" || exit $?
   case "$OS_ID" in
   debian|ubuntu)
-    dpkg -l libssl-dev libffi-dev libgmp-dev || exit 1
+    dpkg -l libssl-dev libffi-dev libgmp-dev || exit $?
     ;;
   redhat|centos|fedora)
-    rpm -q openssl-devel libffi-devel gmp-devel || exit 1
+    rpm -q openssl-devel libffi-devel gmp-devel || exit $?
     ;;
   esac
 fi
@@ -84,14 +84,14 @@ fi
 export PYTHONUSERBASE="$ansible_root"
 export XDG_CACHE_HOME="$ansible_root/var/cache/xdg"
 
-mkdir -p "$ansible_root/bin" || exit 1
-cd "$ansible_root/bin" || exit 1
+mkdir -p "$ansible_root/bin" || exit $?
+cd "$ansible_root/bin" || exit $?
 
 v "Getting get-pip.py ..."
-wget --quiet --timestamping "$get_pip_url" || exit 1
+wget --quiet --timestamping "$get_pip_url" || exit $?
 
 v "Running get-pip.py ..."
-"$python" get-pip.py --user || exit 1
+"$python" get-pip.py --user || exit $?
 
 ## Setup Ansible
 ## ======================================================================
@@ -101,20 +101,20 @@ export PATH="$ansible_root/bin:$PATH"
 export PYTHONPATH="$python_sitelib"
 
 v "Installing modules ..."
-pip install --user --ignore-installed "${python_modules[@]}" || exit 1
+pip install --user --ignore-installed "${python_modules[@]}" || exit $?
 
 ## Create env-setup script
 ## ======================================================================
 
-cat <<EOF >env-setup || exit 1
+cat <<EOF >env-setup || exit $?
 ansible_root="$ansible_root"
 EOF
 
-cat <<'EOF' >>env-setup || exit 1
+cat <<'EOF' >>env-setup || exit $?
 if [[ -n ${ZSH_VERSION-} ]]; then
-  ansible_root=$(cd "${0%/*}/.." && pwd) || return 1
+  ansible_root=$(cd "${0%/*}/.." && pwd) || return $?
 elif [[ -n ${BASH_VERSION-} ]]; then
-  ansible_root=$(cd "${BASH_SOURCE[0]%/*}"/.. && pwd) || return 1
+  ansible_root=$(cd "${BASH_SOURCE[0]%/*}"/.. && pwd) || return $?
 fi
 
 python_sitelib=$(echo "$ansible_root"/lib/python*/*)
