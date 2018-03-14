@@ -48,6 +48,7 @@ python_modules=(
   six${six_version:+==$six_version}
   pywinrm${pywinrm_version:+==$pywinrm_version}
 )
+get_pip_url="${get_pip_uri:-https://bootstrap.pypa.io/get-pip.py}"
 
 echo "Ansible directory: $ansible_root"
 echo "Python: $python"
@@ -55,6 +56,7 @@ echo "Python modules:"
 for module in "${python_modules[@]}"; do
   echo "  $module"
 done
+echo "get-pip.py: $get_pip_url"
 
 ## Check if required component to build modules exist
 ## ======================================================================
@@ -86,7 +88,7 @@ mkdir -p "$ansible_root/bin" || exit 1
 cd "$ansible_root/bin" || exit 1
 
 v "Getting get-pip.py ..."
-wget --quiet --timestamping https://bootstrap.pypa.io/get-pip.py || exit 1
+wget --quiet --timestamping "$get_pip_url" || exit 1
 
 v "Running get-pip.py ..."
 "$python" get-pip.py --user || exit 1
