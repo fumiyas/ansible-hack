@@ -70,7 +70,7 @@ v "Checking C compiler to build binary modules ..."
 type gcc || type cc || exit $?
 
 if [[ -f /etc/os-release ]]; then
-  v "Checking packages to build binary modules ..."
+  v "Checking required packages to build binary modules ..."
 
   eval "$(sed 's/^\([A-Z]\)/OS_\1/' /etc/os-release)" || exit $?
   case "$OS_ID" in
