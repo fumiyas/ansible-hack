@@ -46,6 +46,10 @@ python_modules=(
   jinja2${jinja2_version:+==$jinja2_version}
   httplib2${httplib2_version:+==$httplib2_version}
   six${six_version:+==$six_version}
+  pycrypto${pycrypto_version:+==$pycrypto_version}
+  netaddr${netaddr_version:+==$netaddr_version}
+  jmespath${jmespath_version:+==$jmespath_version}
+  xmltodict${xmltodict_version:+==$xmltodict_version}
   pywinrm${pywinrm_version:+==$pywinrm_version}
 )
 get_pip_url="${get_pip_uri:-https://bootstrap.pypa.io/get-pip.py}"
