@@ -13,8 +13,8 @@ v() {
   echo "$({ tput bold; tput smul; } 2>/dev/null)${0##*/}: $*$(tput sgr0 2>/dev/null)"
 }
 
-if [[ $# -ne 1 ]]; then
-  echo "Usage: $0 <ANSIBLEDIR>"
+if [[ $# -lt 1 ]]; then
+  echo "Usage: $0 <ANSIBLEDIR> [MODULE[=VERSION] ...]"
   echo
   echo "Example to install the latest version:"
   echo "  \$ $0 ~/ansible"
@@ -51,6 +51,7 @@ python_modules=(
   jmespath${jmespath_version:+==$jmespath_version}
   xmltodict${xmltodict_version:+==$xmltodict_version}
   pywinrm${pywinrm_version:+==$pywinrm_version}
+  "$@"
 )
 get_pip_url="${get_pip_uri:-https://bootstrap.pypa.io/get-pip.py}"
 
