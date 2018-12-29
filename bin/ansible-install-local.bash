@@ -39,6 +39,7 @@ if [[ $ansible_root != /* ]]; then
 fi
 
 python="${python:-python}"
+pip="${pip:-pip}"
 python_modules=(
   ansible${ansible_version:+==$ansible_version}
   paramiko${paramiko_version:+==$paramiko_version}
@@ -106,7 +107,7 @@ export PATH="$ansible_root/bin:$PATH"
 export PYTHONPATH="$python_sitelib"
 
 v "Installing modules ..."
-pip install --user --ignore-installed "${python_modules[@]}" || exit $?
+"$pip" install --user --ignore-installed "${python_modules[@]}" || exit $?
 
 ## Create env-setup script
 ## ======================================================================
