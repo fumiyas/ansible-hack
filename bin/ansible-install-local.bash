@@ -84,27 +84,32 @@ if [[ -f /etc/os-release ]]; then
   esac
 fi
 
-## Setup pip
 ## ======================================================================
 
+export PATH="$ansible_root/bin:$PATH"
 export PYTHONUSERBASE="$ansible_root"
 export XDG_CACHE_HOME="$ansible_root/var/cache/xdg"
 
 mkdir -p "$ansible_root/bin" || exit $?
 cd "$ansible_root/bin" || exit $?
 
-v "Getting get-pip.py ..."
-wget --quiet --timestamping "$get_pip_url" || exit $?
+## Setup pip
+## ======================================================================
 
-v "Running get-pip.py ..."
-"$python" get-pip.py --user || exit $?
+if ! type "$pip" >&/dev/null; then
+  v "Getting get-pip.py ..."
+  if type curl >&/dev/null; then
+    curl --output get-pip.py "$get_pip_url" || exit $?
+  else
+    wget --quiet --timestamping "$get_pip_url" || exit $?
+  fi
+
+  v "Running get-pip.py ..."
+  "$python" get-pip.py --user || exit $?
+fi
 
 ## Setup Ansible
 ## ======================================================================
-
-python_sitelib=$(echo "$ansible_root"/lib/python*/*)
-export PATH="$ansible_root/bin:$PATH"
-export PYTHONPATH="$python_sitelib"
 
 v "Installing modules ..."
 "$pip" install --user --ignore-installed "${python_modules[@]}" || exit $?
