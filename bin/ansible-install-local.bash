@@ -76,10 +76,10 @@ if [[ -f /etc/os-release ]]; then
   eval "$(sed 's/^\([A-Z]\)/OS_\1/' /etc/os-release)" || exit $?
   case "$OS_ID" in
   debian|ubuntu)
-    DPKG_PAGER=cat dpkg -l libssl-dev libffi-dev libgmp-dev || exit $?
+    DPKG_PAGER=cat dpkg -l python-dev libssl-dev libffi-dev libgmp-dev || exit $?
     ;;
   redhat|centos|fedora)
-    rpm -q openssl-devel libffi-devel gmp-devel || exit $?
+    rpm -q python-devel openssl-devel libffi-devel gmp-devel || exit $?
     ;;
   esac
 fi
