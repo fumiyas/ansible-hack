@@ -122,10 +122,14 @@ ansible_root="$ansible_root"
 EOF
 
 cat <<'EOF' >>env-setup || exit $?
-if [[ -n ${ZSH_VERSION-} ]]; then
+if [ X"${0##*/}" = X"env-setup" ]; then
   ansible_root=$(cd "${0%/*}/.." && pwd) || return $?
-elif [[ -n ${BASH_VERSION-} ]]; then
+elif [ -n "${BASH_VERSION-}" ]; then
   ansible_root=$(cd "${BASH_SOURCE[0]%/*}"/.. && pwd) || return $?
+elif [ -n "$KSH_VERSION" ] && [ -n "${KSH_VERSION#*MIRBSD KSH *}" ]; then
+  ansible_root=$(cd "${.sh.file%/*}/.." && pwd) || return $?
+else
+  ansible_root="$PWD"
 fi
 
 python_sitelib=$(echo "$ansible_root"/lib/python*/*)
