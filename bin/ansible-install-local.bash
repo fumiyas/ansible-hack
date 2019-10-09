@@ -19,14 +19,14 @@ if [[ $# -lt 1 ]]; then
   echo "Example to install the latest version:"
   echo "  \$ $0 ~/ansible"
   echo "  ..."
-  echo "  \$ source ~/ansible/bin/env-setup"
+  echo "  \$ source ~/ansible/bin/activate"
   echo "  \$ type ansible"
   echo "  ansible is /home/yourname/ansible/bin/ansible"
   echo "  \$ ansible localhost -m ping"
   echo "  ..."
   echo
   echo "Example to install a specific version:"
-  echo "  \$ ansible_version=2.2.1.0 $0 ~/ansible"
+  echo "  \$ ansible_version=2.8.5.0 $0 ~/ansible"
   echo "  ..."
   exit 1
 fi
@@ -114,15 +114,15 @@ fi
 v "Installing modules ..."
 "$pip" install --user --ignore-installed "${python_modules[@]}" || exit $?
 
-## Create env-setup script
+## Create activate script
 ## ======================================================================
 
-cat <<EOF >env-setup || exit $?
+cat <<EOF >activate || exit $?
 ansible_root="$ansible_root"
 EOF
 
-cat <<'EOF' >>env-setup || exit $?
-if [ X"${0##*/}" = X"env-setup" ]; then
+cat <<'EOF' >>activate || exit $?
+if [ X"${0##*/}" = X"activate" ]; then
   ansible_root=$(cd "${0%/*}/.." && pwd) || return $?
 elif [ -n "${BASH_VERSION-}" ]; then
   ansible_root=$(cd "${BASH_SOURCE[0]%/*}"/.. && pwd) || return $?
@@ -137,6 +137,9 @@ python_sitelib=$(echo "$ansible_root"/lib/python*/*)
 export PATH="$ansible_root/bin:$PATH"
 export PYTHONPATH="$python_sitelib"
 EOF
+
+## Backward compatibility
+ln -s activate env-setup
 
 v "Done."
 exit 0
