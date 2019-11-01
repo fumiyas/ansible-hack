@@ -9,6 +9,11 @@
 set -u
 umask 0022
 
+pdie() {
+  echo "$0: ERROR: ${1-}" 1>&2
+  exit "${2-1}"
+}
+
 v() {
   echo "$({ tput bold; tput smul; } 2>/dev/null)${0##*/}: $*$(tput sgr0 2>/dev/null)"
 }
@@ -38,26 +43,56 @@ if [[ $ansible_root != /* ]]; then
   ansible_root="$PWD/$ansible_root"
 fi
 
-python="${python:-python}"
-pip="${pip:-pip}"
+if [[ -z ${python-} ]]; then
+  for python_try in /usr/libexec/platform-python python3 python; do
+    if type "$python_try" >/dev/null 2>&1; then
+      python="$python_try"
+      break
+    fi
+  done
+fi
+if [[ -z ${python-} ]]; then
+  pdie "Python not found"
+fi
+
+python_ver=$(
+"$python" <<'EOF'
+from __future__ import print_function
+import sys
+print('.'.join((str(x) for x in sys.version_info)))
+EOF
+)
+python_ver_int=$(
+"$python" <<'EOF'
+from __future__ import print_function
+import sys
+print('%d%02d%02d' % sys.version_info[:3])
+EOF
+)
+
 python_modules=(
   ansible${ansible_version:+==$ansible_version}
-  paramiko${paramiko_version:+==$paramiko_version}
   pyyaml${pyyaml_version:+==$pyyaml_version}
   jinja2${jinja2_version:+==$jinja2_version}
+  cryptography${cryptography_version:+==$cryptography_version}
+  pycrypto${pycrypto_version:+==$pycrypto_version}
+  paramiko${paramiko_version:+==$paramiko_version}
   httplib2${httplib2_version:+==$httplib2_version}
   six${six_version:+==$six_version}
-  pycrypto${pycrypto_version:+==$pycrypto_version}
   netaddr${netaddr_version:+==$netaddr_version}
   jmespath${jmespath_version:+==$jmespath_version}
   xmltodict${xmltodict_version:+==$xmltodict_version}
   pywinrm${pywinrm_version:+==$pywinrm_version}
   "$@"
 )
+
 get_pip_url="${get_pip_uri:-https://bootstrap.pypa.io/get-pip.py}"
+
+## ----------------------------------------------------------------------
 
 echo "Ansible directory: $ansible_root"
 echo "Python: $python"
+echo "Python version: $python_ver"
 echo "Python modules:"
 for module in "${python_modules[@]}"; do
   echo "  $module"
@@ -76,10 +111,22 @@ if [[ -f /etc/os-release ]]; then
   eval "$(sed 's/^\([A-Z]\)/OS_\1/' /etc/os-release)" || exit $?
   case "$OS_ID" in
   debian|ubuntu)
-    DPKG_PAGER=cat dpkg -l python-dev libssl-dev libffi-dev libgmp-dev || exit $?
+    buildrequires=(libssl-dev libffi-dev libgmp-dev)
+    if [[ $python_ver_int -ge 30000 ]];then
+      buildrequires+=(python3-dev)
+    else
+      buildrequires+=(python-dev)
+    fi
+    DPKG_PAGER=cat dpkg -l "${buildrequires[@]}" libffi-dev libgmp-dev || exit $?
     ;;
   redhat|centos|fedora)
-    rpm -q python-devel openssl-devel libffi-devel gmp-devel || exit $?
+    buildrequires=(openssl-devel libffi-devel gmp-devel)
+    if [[ $python_ver_int -ge 30000 ]];then
+      buildrequires+=(python3-devel)
+    else
+      buildrequires+=(python-devel)
+    fi
+    rpm -q "${buildrequires[@]}" || exit $?
     ;;
   esac
 fi
@@ -93,10 +140,34 @@ export XDG_CACHE_HOME="$ansible_root/var/cache/xdg"
 mkdir -p "$ansible_root/bin" || exit $?
 cd "$ansible_root/bin" || exit $?
 
+## Create activate script
+## ======================================================================
+
+cat <<'EOF' >>activate || exit $?
+if [ -n "${ZSH_VERSION-}" ]; then
+  ansible_root=$(cd "${0%/*}/.." && pwd) || return $?
+elif [ -n "${BASH_VERSION-}" ]; then
+  ansible_root=$(cd "${BASH_SOURCE[0]%/*}"/.. && pwd) || return $?
+elif [ -n "$KSH_VERSION" ] && [ -n "${KSH_VERSION##*MIRBSD KSH *}" ]; then
+  ## AT&T ksh
+  ansible_root=$(cd "${.sh.file%/*}/.." && pwd) || return $?
+else
+  ansible_root="$PWD"
+fi
+
+python_sitelib=$(echo "$ansible_root"/lib/python*/*)
+
+export PATH="$ansible_root/bin:$PATH"
+export PYTHONPATH="$python_sitelib"
+EOF
+
+## Backward compatibility
+ln -s activate env-setup
+
 ## Setup pip
 ## ======================================================================
 
-if ! type "$pip" >&/dev/null; then
+if ! "$python" -m pip help >&/dev/null; then
   v "Getting get-pip.py ..."
   if type curl >&/dev/null; then
     curl --output get-pip.py "$get_pip_url" || exit $?
@@ -111,35 +182,12 @@ fi
 ## Setup Ansible
 ## ======================================================================
 
+. ./activate || exit $?
+
 v "Installing modules ..."
-"$pip" install --user --ignore-installed "${python_modules[@]}" || exit $?
+"$python" -m pip install --user --ignore-installed "${python_modules[@]}" || exit $?
 
-## Create activate script
 ## ======================================================================
-
-cat <<EOF >activate || exit $?
-ansible_root="$ansible_root"
-EOF
-
-cat <<'EOF' >>activate || exit $?
-if [ X"${0##*/}" = X"activate" ]; then
-  ansible_root=$(cd "${0%/*}/.." && pwd) || return $?
-elif [ -n "${BASH_VERSION-}" ]; then
-  ansible_root=$(cd "${BASH_SOURCE[0]%/*}"/.. && pwd) || return $?
-elif [ -n "$KSH_VERSION" ] && [ -n "${KSH_VERSION#*MIRBSD KSH *}" ]; then
-  ansible_root=$(cd "${.sh.file%/*}/.." && pwd) || return $?
-else
-  ansible_root="$PWD"
-fi
-
-python_sitelib=$(echo "$ansible_root"/lib/python*/*)
-
-export PATH="$ansible_root/bin:$PATH"
-export PYTHONPATH="$python_sitelib"
-EOF
-
-## Backward compatibility
-ln -s activate env-setup
 
 v "Done."
 exit 0
