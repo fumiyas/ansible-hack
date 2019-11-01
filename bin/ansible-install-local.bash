@@ -121,7 +121,9 @@ if [[ -f /etc/os-release ]]; then
     ;;
   redhat|centos|fedora)
     buildrequires=(openssl-devel libffi-devel gmp-devel)
-    if [[ $python_ver_int -ge 30000 ]];then
+    if [[ ${python##*/} == platform-python && $OS_VERSION_ID -ge 8 ]]; then
+      buildrequires+=(platform-python-devel)
+    elif [[ $python_ver_int -ge 30000 ]];then
       buildrequires+=(python3-devel)
     else
       buildrequires+=(python-devel)
