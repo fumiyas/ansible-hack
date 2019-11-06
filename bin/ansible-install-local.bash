@@ -117,7 +117,8 @@ if [[ -f /etc/os-release ]]; then
     else
       buildrequires+=(python-dev)
     fi
-    DPKG_PAGER=cat dpkg -l "${buildrequires[@]}" libffi-dev libgmp-dev || exit $?
+    dpkg --list --no-pager "${buildrequires[@]}" libffi-dev libgmp-dev || true
+    dpkg --status "${buildrequires[@]}" libffi-dev libgmp-dev >/dev/null || exit $?
     ;;
   redhat|centos|fedora)
     buildrequires=(openssl-devel libffi-devel gmp-devel)
