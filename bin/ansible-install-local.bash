@@ -70,6 +70,13 @@ print('%d%02d%02d' % sys.version_info[:3])
 EOF
 )
 
+python_modules_pre=()
+if ! "$python" -m wheel --help >/dev/null 2>&1; then
+  python_modules_pre+=(
+    wheel${wheel_version:+==$wheel_version}
+  )
+fi
+
 python_modules=(
   ansible${ansible_version:+==$ansible_version}
   pyyaml${pyyaml_version:+==$pyyaml_version}
@@ -188,6 +195,9 @@ fi
 . ./activate || exit $?
 
 v "Installing modules ..."
+if [[ ${#python_modules_pre[@]} -gt 0 ]]; then
+  "$python" -m pip install --user --ignore-installed "${python_modules_pre[@]}" || exit $?
+fi
 "$python" -m pip install --user --ignore-installed "${python_modules[@]}" || exit $?
 
 ## ======================================================================
