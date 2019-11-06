@@ -111,7 +111,7 @@ if [[ -f /etc/os-release ]]; then
   eval "$(sed 's/^\([A-Z]\)/OS_\1/' /etc/os-release)" || exit $?
   case "$OS_ID" in
   debian|ubuntu)
-    buildrequires=(libssl-dev libffi-dev libgmp-dev)
+    buildrequires=(gcc libssl-dev libffi-dev libgmp-dev)
     if [[ $python_ver_int -ge 30000 ]];then
       buildrequires+=(python3-dev)
     else
@@ -121,7 +121,7 @@ if [[ -f /etc/os-release ]]; then
     dpkg --status "${buildrequires[@]}" libffi-dev libgmp-dev >/dev/null || exit $?
     ;;
   redhat|centos|fedora)
-    buildrequires=(openssl-devel libffi-devel gmp-devel)
+    buildrequires=(gcc openssl-devel libffi-devel gmp-devel)
     if [[ ${python##*/} == platform-python && $OS_VERSION_ID -ge 8 ]]; then
       buildrequires+=(platform-python-devel)
     elif [[ $python_ver_int -ge 30000 ]];then
