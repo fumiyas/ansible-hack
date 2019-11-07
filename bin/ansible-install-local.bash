@@ -172,7 +172,7 @@ export PYTHONPATH="$python_sitelib"
 EOF
 
 ## Backward compatibility
-ln -s activate env-setup
+ln -sf activate env-setup
 
 ## Setup pip
 ## ======================================================================
