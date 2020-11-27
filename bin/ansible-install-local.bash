@@ -145,6 +145,7 @@ fi
 
 export PATH="$ansible_root/bin:$PATH"
 export PYTHONUSERBASE="$ansible_root"
+export PIP_PROGRESS_BAR=off
 export XDG_CACHE_HOME="$ansible_root/var/cache/xdg"
 
 mkdir -p "$ansible_root/bin" || exit $?
