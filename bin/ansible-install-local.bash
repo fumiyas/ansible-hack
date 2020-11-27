@@ -97,6 +97,10 @@ get_pip_url="${get_pip_uri:-https://bootstrap.pypa.io/get-pip.py}"
 
 ## ----------------------------------------------------------------------
 
+eval "$(sed 's/^\([A-Z]\)/OS_\1/' /etc/os-release)" || exit $?
+
+## ----------------------------------------------------------------------
+
 echo "Ansible directory: $ansible_root"
 echo "Python: $python"
 echo "Python version: $python_ver"
@@ -112,34 +116,30 @@ echo "get-pip.py: $get_pip_url"
 v "Checking C compiler to build binary modules ..."
 type gcc || type cc || exit $?
 
-if [[ -f /etc/os-release ]]; then
-  v "Checking required packages to build binary modules ..."
-
-  eval "$(sed 's/^\([A-Z]\)/OS_\1/' /etc/os-release)" || exit $?
-  case "$OS_ID" in
-  debian|ubuntu)
-    buildrequires=(gcc libssl-dev libffi-dev libgmp-dev)
-    if [[ $python_ver_int -ge 30000 ]];then
-      buildrequires+=(python3-dev)
-    else
-      buildrequires+=(python-dev)
-    fi
-    dpkg --list --no-pager "${buildrequires[@]}" libffi-dev libgmp-dev || true
-    dpkg --status "${buildrequires[@]}" libffi-dev libgmp-dev >/dev/null || exit $?
-    ;;
-  redhat|centos|fedora)
-    buildrequires=(gcc openssl-devel libffi-devel gmp-devel)
-    if [[ ${python##*/} == platform-python && $OS_VERSION_ID -ge 8 ]]; then
-      buildrequires+=(platform-python-devel)
-    elif [[ $python_ver_int -ge 30000 ]];then
-      buildrequires+=(python3-devel)
-    else
-      buildrequires+=(python-devel)
-    fi
-    rpm -q "${buildrequires[@]}" || exit $?
-    ;;
-  esac
-fi
+v "Checking required packages to build binary modules ..."
+case "$OS_ID" in
+debian|ubuntu)
+  buildrequires=(gcc libssl-dev libffi-dev libgmp-dev)
+  if [[ $python_ver_int -ge 30000 ]];then
+    buildrequires+=(python3-dev)
+  else
+    buildrequires+=(python-dev)
+  fi
+  dpkg --list --no-pager "${buildrequires[@]}" libffi-dev libgmp-dev || true
+  dpkg --status "${buildrequires[@]}" libffi-dev libgmp-dev >/dev/null || exit $?
+  ;;
+redhat|centos|fedora)
+  buildrequires=(gcc openssl-devel libffi-devel gmp-devel)
+  if [[ ${python##*/} == platform-python && $OS_VERSION_ID -ge 8 ]]; then
+    buildrequires+=(platform-python-devel)
+  elif [[ $python_ver_int -ge 30000 ]];then
+    buildrequires+=(python3-devel)
+  else
+    buildrequires+=(python-devel)
+  fi
+  rpm -q "${buildrequires[@]}" || exit $?
+  ;;
+esac
 
 ## ======================================================================
 
@@ -174,6 +174,39 @@ EOF
 
 ## Backward compatibility
 ln -sf activate env-setup
+
+## Install sshpass
+## ======================================================================
+
+if [[ -x ./sshpass ]]; then
+  : OK
+elif type sshpass >/dev/null 2>&1; then
+  v "Copying sshpass if available ..."
+  sshpass_is=$(LC_ALL=C type sshpass) || exit $?
+  cp -p -- "${sshpass_is#sshpass is }" ./ || exit $?
+else
+  v "Downloading sshpass binary ..."
+  case "$OS_ID" in
+  debian|ubuntu)
+    rm -f sshpass_[0-9]*.deb || exit $?
+    apt download sshpass || exit $?
+    ar p sshpass_[0-9]*.deb data.tar.xz |tar -xf - --xz ./usr/bin/sshpass || exit $?
+    mv ./usr/bin/sshpass ./ || exit $?
+    rmdir ./usr/bin ./usr
+    ;;
+  redhat|centos|fedora)
+    rm -f sshpass-[0-9]*.rpm || exit $?
+    yumdownloader --enablerepo=extras sshpass || exit $?
+    rpm2cpio sshpass-[0-9]*.rpm |cpio -i ./usr/bin/sshpass || exit $?
+    mv ./usr/bin/sshpass ./ || exit $?
+    rmdir ./usr/bin ./usr
+    rm -f sshpass-[0-9]*.rpm || exit $?
+    ;;
+  *)
+    pdie "Unknown OS Identifier: $OS_ID"
+    ;;
+  esac
+fi
 
 ## Setup pip
 ## ======================================================================
