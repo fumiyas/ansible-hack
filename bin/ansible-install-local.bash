@@ -138,7 +138,7 @@ redhat|centos|fedora)
   else
     buildrequires+=(python-devel)
   fi
-  rpm -q "${buildrequires[@]}" \
+  rpm -q --qf '%{name}-%{version}-%{release}\n' "${buildrequires[@]}" \
   |sed -n -e '/ /{s/^/ERROR: /;H;d}' -e 'p' -e '${x;s/^\n//;p}' \
   || exit $? \
   ;
