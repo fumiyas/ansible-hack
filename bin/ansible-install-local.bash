@@ -8,6 +8,7 @@
 
 set -u
 umask 0022
+set -o pipefail || exit $?	## bash 3.0+
 
 pdie() {
   echo "$0: ERROR: ${1-}" 1>&2
@@ -137,7 +138,10 @@ redhat|centos|fedora)
   else
     buildrequires+=(python-devel)
   fi
-  rpm -q "${buildrequires[@]}" || exit $?
+  rpm -q "${buildrequires[@]}" \
+  |sed -n -e '/ /{s/^/ERROR: /;H;d}' -e 'p' -e '${x;s/^\n//;p}' \
+  || exit $? \
+  ;
   ;;
 esac
 
