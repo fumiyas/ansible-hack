@@ -1,7 +1,7 @@
 #!/bin/bash
 ##
 ## Ansible: Setup user's local Ansible environment
-## Copyright (c) 2017-2019 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Copyright (c) 2017-2020 SATOH Fumiyasu @ OSS Technology Corp., Japan
 ##
 ## License: GNU General Public License version 3
 ##
@@ -125,8 +125,8 @@ debian|ubuntu)
   else
     buildrequires+=(python-dev)
   fi
-  dpkg --list --no-pager "${buildrequires[@]}" libffi-dev libgmp-dev || true
-  dpkg --status "${buildrequires[@]}" libffi-dev libgmp-dev >/dev/null || exit $?
+  dpkg --list --no-pager "${buildrequires[@]}" || true
+  dpkg --status "${buildrequires[@]}" >/dev/null || exit $?
   ;;
 redhat|centos|fedora)
   buildrequires=(gcc openssl-devel libffi-devel gmp-devel)
