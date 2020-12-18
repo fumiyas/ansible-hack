@@ -96,6 +96,9 @@ python_modules=(
 
 get_pip_url="${get_pip_uri:-https://bootstrap.pypa.io/get-pip.py}"
 
+sshpass_src_base_url="https://sourceforge.net/projects/sshpass/files/sshpass"
+sshpass_version="1.06"
+
 ## ----------------------------------------------------------------------
 
 eval "$(sed 's/^\([A-Z]\)/OS_\1/' /etc/os-release)" || exit $?
@@ -190,9 +193,9 @@ elif type sshpass >/dev/null 2>&1; then
   sshpass_is=$(LC_ALL=C type sshpass) || exit $?
   cp -p -- "${sshpass_is#sshpass is }" ./ || exit $?
 else
-  v "Downloading sshpass binary ..."
   case "$OS_ID" in
   debian|ubuntu)
+    v "Downloading sshpass binary in *.deb package ..."
     rm -f sshpass_[0-9]*.deb || exit $?
     apt download sshpass || exit $?
     ar p sshpass_[0-9]*.deb data.tar.xz |tar -xf - --xz ./usr/bin/sshpass || exit $?
@@ -200,12 +203,31 @@ else
     rmdir ./usr/bin ./usr
     ;;
   redhat|centos|fedora)
-    rm -f sshpass-[0-9]*.rpm || exit $?
-    yumdownloader --enablerepo=extras sshpass || exit $?
-    rpm2cpio sshpass-[0-9]*.rpm |cpio -i ./usr/bin/sshpass || exit $?
-    mv ./usr/bin/sshpass ./ || exit $?
-    rmdir ./usr/bin ./usr
-    rm -f sshpass-[0-9]*.rpm || exit $?
+    if [[ $OS_VERSION_ID -le 7 ]] || [[ $OS_ID == fedora ]]; then
+      v "Downloading sshpass binary in *.rpm package ..."
+      rm -f sshpass-[0-9]*.rpm || exit $?
+      yumdownloader --disablerepo=\* --enablerepo=extras sshpass || exit $?
+      rpm2cpio sshpass-[0-9]*.rpm |cpio -id ./usr/bin/sshpass || exit $?
+      mv ./usr/bin/sshpass ./ || exit $?
+      rmdir ./usr/bin ./usr
+      rm -f sshpass-[0-9]*.rpm || exit $?
+    else
+      v "Building sshpass binary from source archive ..."
+      rm -rf sshpass-[0-9]* || exit $?
+      curl \
+	--silent \
+	--show-error \
+	--location \
+	--remote-name \
+	"$sshpass_src_base_url/$sshpass_version/sshpass-$sshpass_version.tar.gz" \
+      || exit $?
+      tar xf "sshpass-$sshpass_version.tar.gz" || exit $?
+      pushd "sshpass-$sshpass_version" || exit $?
+      ./configure || exit $?
+      make || exit $?
+      mv sshpass ../ || exit $?
+      popd || exit $?
+    fi
     ;;
   *)
     pdie "Unknown OS Identifier: $OS_ID"
