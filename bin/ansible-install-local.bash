@@ -149,6 +149,7 @@ esac
 
 export PATH="$ansible_root/bin:$PATH"
 export PYTHONUSERBASE="$ansible_root"
+export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
 export PIP_PROGRESS_BAR=off
 export XDG_CACHE_HOME="$ansible_root/var/cache/xdg"
 
