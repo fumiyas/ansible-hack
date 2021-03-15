@@ -97,7 +97,7 @@ python_modules=(
 get_pip_url="${get_pip_uri:-https://bootstrap.pypa.io/get-pip.py}"
 
 sshpass_src_base_url="https://sourceforge.net/projects/sshpass/files/sshpass"
-sshpass_version="1.06"
+sshpass_version="${sshpass_version:-1.09}"
 
 ## ----------------------------------------------------------------------
 
