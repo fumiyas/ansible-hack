@@ -1,7 +1,7 @@
 #!/bin/bash
 ##
 ## Ansible: Setup user's local Ansible environment
-## Copyright (c) 2017-2020 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Copyright (c) 2017-2021 SATOH Fumiyasu @ OSS Technology Corp., Japan
 ##
 ## License: GNU General Public License version 3
 ##
@@ -82,7 +82,7 @@ python_modules=(
   ansible${ansible_version:+==$ansible_version}
   pyyaml${pyyaml_version:+==$pyyaml_version}
   jinja2${jinja2_version:+==$jinja2_version}
-  cryptography${cryptography_version:+==$cryptography_version}
+  cryptography${cryptography_version:+==$cryptography_version}${cryptography_version:-<3.4}
   pycrypto${pycrypto_version:+==$pycrypto_version}
   paramiko${paramiko_version:+==$paramiko_version}
   httplib2${httplib2_version:+==$httplib2_version}
