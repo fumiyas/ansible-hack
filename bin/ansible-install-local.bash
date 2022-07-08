@@ -236,9 +236,12 @@ else
       fi
       rpm2cpio sshpass-[0-9]*.rpm |cpio -id ./usr/bin/sshpass || exit $?
       mv ./usr/bin/sshpass ./ || exit $?
-      rmdir ./usr/bin ./usr
+      rmdir ./usr/bin ./usr || exit $?
       rm -f sshpass-[0-9]*.rpm || exit $?
     else
+      v "Checking curl and make commands to build ssh pass binary ..."
+      type curl || exit $?
+      type make || exit $?
       v "Building sshpass binary from source archive ..."
       rm -rf sshpass-[0-9]* || exit $?
       curl \
