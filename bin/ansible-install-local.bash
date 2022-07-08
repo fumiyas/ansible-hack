@@ -78,6 +78,10 @@ if ! "$python" -m wheel --help >/dev/null 2>&1; then
   )
 fi
 
+if [[ $python_ver_int -lt 30800 && -z ${ansible_version-} ]];then
+  ansible_core_version='<2.12'
+fi
+
 python_modules=(
   ansible${ansible_version-}
   ansible-core${ansible_core_version-}
