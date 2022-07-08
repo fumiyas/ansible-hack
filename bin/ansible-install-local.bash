@@ -32,7 +32,7 @@ if [[ $# -lt 1 ]]; then
   echo "  ..."
   echo
   echo "Example to install a specific version:"
-  echo "  \$ ansible_version=2.8.5.0 $0 ~/ansible"
+  echo "  \$ ansible_core_version='<2.12' $0 ~/ansible"
   echo "  ..."
   exit 1
 fi
@@ -74,23 +74,25 @@ EOF
 python_modules_pre=()
 if ! "$python" -m wheel --help >/dev/null 2>&1; then
   python_modules_pre+=(
-    wheel${wheel_version:+==$wheel_version}
+    wheel${wheel_version-}
   )
 fi
 
 python_modules=(
-  ansible${ansible_version:+==$ansible_version}
-  pyyaml${pyyaml_version:+==$pyyaml_version}
-  jinja2${jinja2_version:+==$jinja2_version}
-  cryptography${cryptography_version:+==$cryptography_version}${cryptography_version:-<3.4}
-  pycrypto${pycrypto_version:+==$pycrypto_version}
-  paramiko${paramiko_version:+==$paramiko_version}
-  httplib2${httplib2_version:+==$httplib2_version}
-  six${six_version:+==$six_version}
-  netaddr${netaddr_version:+==$netaddr_version}
-  jmespath${jmespath_version:+==$jmespath_version}
-  xmltodict${xmltodict_version:+==$xmltodict_version}
-  pywinrm${pywinrm_version:+==$pywinrm_version}
+  ansible${ansible_version-}
+  ansible-core${ansible_core_version-}
+  pyyaml${pyyaml_version-}
+  jinja2${jinja2_version-}
+  ## cryptography 3.4+ requires Rust compiler
+  cryptography${cryptography_version-}${cryptography_version:-<3.4}
+  pycrypto${pycrypto_version-}
+  paramiko${paramiko_version-}
+  httplib2${httplib2_version-}
+  six${six_version-}
+  netaddr${netaddr_version-}
+  jmespath${jmespath_version-}
+  xmltodict${xmltodict_version-}
+  pywinrm${pywinrm_version-}
   "$@"
 )
 
