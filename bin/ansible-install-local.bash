@@ -118,6 +118,7 @@ fi
 ## ----------------------------------------------------------------------
 
 eval "$(sed 's/^\([A-Z]\)/OS_\1/' /etc/os-release)" || exit $?
+OS_VERSION_MAJOR="${OS_VERSION_ID%%.*}"
 
 ## ----------------------------------------------------------------------
 
@@ -148,9 +149,9 @@ debian|ubuntu)
   dpkg --list --no-pager "${buildrequires[@]}" || true
   dpkg --status "${buildrequires[@]}" >/dev/null || exit $?
   ;;
-redhat|centos|fedora)
+redhat|almalinux|rocky|centos|fedora)
   buildrequires=(gcc openssl-devel libffi-devel gmp-devel)
-  if [[ ${python##*/} == platform-python && $OS_VERSION_ID -ge 8 ]]; then
+  if [[ ${python##*/} == platform-python && $OS_VERSION_MAJOR -eq 8 ]]; then
     buildrequires+=(platform-python-devel)
   elif [[ $python_ver_int -ge 30000 ]];then
     buildrequires+=(python3-devel)
@@ -224,8 +225,8 @@ else
     mv ./usr/bin/sshpass ./ || exit $?
     rmdir ./usr/bin ./usr
     ;;
-  redhat|centos|fedora)
-    if [[ $OS_VERSION_ID -le 7 ]] || [[ $OS_ID == fedora ]]; then
+  redhat|almalinux|rocky|centos|fedora)
+    if [[ $OS_VERSION_MAJOR -ne 8 ]] || [[ $OS_ID == fedora ]]; then
       v "Downloading sshpass binary in *.rpm package ..."
       rm -f sshpass-[0-9]*.rpm || exit $?
       if type dnf >/dev/null 2>&1; then
