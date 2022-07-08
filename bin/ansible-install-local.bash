@@ -100,7 +100,11 @@ python_modules=(
   "$@"
 )
 
-get_pip_url="${get_pip_uri:-https://bootstrap.pypa.io/get-pip.py}"
+if [[ $python_ver_int -ge 30700 ]];then
+  get_pip_url="${get_pip_uri:-https://bootstrap.pypa.io/get-pip.py}"
+else
+  get_pip_url="${get_pip_uri:-https://bootstrap.pypa.io/pip/3.6/get-pip.py}"
+fi
 
 sshpass_src_base_url="https://sourceforge.net/projects/sshpass/files/sshpass"
 sshpass_version="${sshpass_version:-1.09}"
