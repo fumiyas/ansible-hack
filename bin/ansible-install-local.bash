@@ -228,7 +228,11 @@ else
     if [[ $OS_VERSION_ID -le 7 ]] || [[ $OS_ID == fedora ]]; then
       v "Downloading sshpass binary in *.rpm package ..."
       rm -f sshpass-[0-9]*.rpm || exit $?
-      yumdownloader --disablerepo=\* --enablerepo=extras sshpass || exit $?
+      if type dnf >/dev/null 2>&1; then
+        dnf install --assumeyes --downloadonly --downloaddir=. sshpass || exit $?
+      else
+        yumdownloader --disablerepo=\* --enablerepo=extras sshpass || exit $?
+      fi
       rpm2cpio sshpass-[0-9]*.rpm |cpio -id ./usr/bin/sshpass || exit $?
       mv ./usr/bin/sshpass ./ || exit $?
       rmdir ./usr/bin ./usr
