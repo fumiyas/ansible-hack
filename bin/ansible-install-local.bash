@@ -118,6 +118,12 @@ fi
 ## ----------------------------------------------------------------------
 
 eval "$(sed 's/^\([A-Z]\)/OS_\1/' /etc/os-release)" || exit $?
+
+if [[ -z ${OS_VERSION_ID-} ]]; then
+  ## Debian unstable (sid)
+  OS_VERSION_ID="9999"
+fi
+
 OS_VERSION_MAJOR="${OS_VERSION_ID%%.*}"
 
 ## ----------------------------------------------------------------------
