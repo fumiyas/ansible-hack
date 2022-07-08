@@ -225,11 +225,11 @@ else
       v "Building sshpass binary from source archive ..."
       rm -rf sshpass-[0-9]* || exit $?
       curl \
-	--silent \
-	--show-error \
-	--location \
-	--remote-name \
-	"$sshpass_src_base_url/$sshpass_version/sshpass-$sshpass_version.tar.gz" \
+        --silent \
+        --show-error \
+        --location \
+        --remote-name \
+        "$sshpass_src_base_url/$sshpass_version/sshpass-$sshpass_version.tar.gz" \
       || exit $?
       tar xf "sshpass-$sshpass_version.tar.gz" || exit $?
       pushd "sshpass-$sshpass_version" || exit $?
