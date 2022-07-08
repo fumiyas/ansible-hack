@@ -181,8 +181,11 @@ type gcc || type cc || exit $?
 
 export PATH="$ansible_root/bin:$PATH"
 export PYTHONUSERBASE="$ansible_root"
+export PYTHONDONTWRITEBYTECODE="set"
+export PYTHONUNBUFFERED="set"
 export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
 export PIP_PROGRESS_BAR=off
+export PIP_NO_CACHE_DIR=on
 export XDG_CACHE_HOME="$ansible_root/var/cache/xdg"
 
 mkdir -p "$ansible_root/bin" || exit $?
