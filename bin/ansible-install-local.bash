@@ -109,6 +109,12 @@ fi
 sshpass_src_base_url="https://sourceforge.net/projects/sshpass/files/sshpass"
 sshpass_version="${sshpass_version:-1.09}"
 
+if [[ $(id -u) -eq 0 ]]; then
+  sudo=
+else
+  sudo='sudo'
+fi
+
 ## ----------------------------------------------------------------------
 
 eval "$(sed 's/^\([A-Z]\)/OS_\1/' /etc/os-release)" || exit $?
@@ -127,9 +133,6 @@ echo "get-pip.py: $get_pip_url"
 ## Check if required component to build modules exist
 ## ======================================================================
 
-v "Checking C compiler to build binary modules ..."
-type gcc || type cc || exit $?
-
 v "Checking required packages to build binary modules ..."
 case "$OS_ID" in
 debian|ubuntu)
@@ -138,6 +141,9 @@ debian|ubuntu)
     buildrequires+=(python3-dev)
   else
     buildrequires+=(python-dev)
+  fi
+  if [[ -n ${ANSIBLE_INSTALL_LOCAL_INSTALL_BUILDREQUIRES-} ]]; then
+    $sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes "${buildrequires[@]}" || exit $?
   fi
   dpkg --list --no-pager "${buildrequires[@]}" || true
   dpkg --status "${buildrequires[@]}" >/dev/null || exit $?
@@ -151,12 +157,18 @@ redhat|centos|fedora)
   else
     buildrequires+=(python-devel)
   fi
+  if [[ -n ${ANSIBLE_INSTALL_LOCAL_INSTALL_BUILDREQUIRES-} ]]; then
+    $sudo yum install --assumeyes "${buildrequires[@]}" || exit $?
+  fi
   rpm -q --qf '%{name}-%{version}-%{release}\n' "${buildrequires[@]}" \
   |sed -n -e '/ /{s/^/ERROR: /;H}' -e '/ /!p' -e '${x;s/^\n//;p}' \
   || exit $? \
   ;
   ;;
 esac
+
+v "Checking C compiler to build binary modules ..."
+type gcc || type cc || exit $?
 
 ## ======================================================================
 
