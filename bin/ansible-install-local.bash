@@ -186,7 +186,6 @@ export PYTHONUNBUFFERED="set"
 export PYTHON_KEYRING_BACKEND="keyring.backends.null.Keyring"
 export PIP_DISABLE_PIP_VERSION_CHECK="on"
 export PIP_PROGRESS_BAR="off"
-export PIP_NO_CACHE_DIR="on"
 export XDG_CACHE_HOME="$ansible_root/var/cache/xdg"
 
 mkdir -p "$ansible_root/bin" || exit $?
@@ -295,11 +294,17 @@ fi
 
 . ./activate || exit $?
 
+pip() {
+  ## Use --no-cache-dir option instead of PIP_NO_CACHE_DIR environment
+  ## for workaround a issue: https://github.com/pypa/pip/issues/5852
+  command "$python" -m pip --no-cache-dir "$@"
+}
+
 v "Installing modules ..."
 if [[ ${#python_modules_pre[@]} -gt 0 ]]; then
-  "$python" -m pip install --user --ignore-installed "${python_modules_pre[@]}" || exit $?
+  pip install --user --ignore-installed "${python_modules_pre[@]}" || exit $?
 fi
-"$python" -m pip install --user --ignore-installed "${python_modules[@]}" || exit $?
+pip install --user --ignore-installed "${python_modules[@]}" || exit $?
 
 ## ======================================================================
 
