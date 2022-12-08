@@ -46,26 +46,24 @@ fi
 
 if [[ -z ${python-} ]]; then
   for python_try in /usr/libexec/platform-python python3 python; do
-    if type "$python_try" >/dev/null 2>&1; then
+    if "$python_try" -c 'import sys; sys.exit(sys.version_info[0]<3)' >/dev/null 2>&1; then
       python="$python_try"
       break
     fi
   done
 fi
 if [[ -z ${python-} ]]; then
-  pdie "Python not found"
+  pdie "Python3 not found"
 fi
 
 python_ver=$(
 "$python" <<'EOF'
-from __future__ import print_function
 import sys
 print('.'.join((str(x) for x in sys.version_info)))
 EOF
 )
 python_ver_int=$(
 "$python" <<'EOF'
-from __future__ import print_function
 import sys
 print('%d%02d%02d' % sys.version_info[:3])
 EOF
@@ -143,12 +141,7 @@ echo "get-pip.py: $get_pip_url"
 v "Checking required packages to build binary modules ..."
 case "$OS_ID" in
 debian|ubuntu)
-  buildrequires=(gcc libssl-dev libffi-dev libgmp-dev)
-  if [[ $python_ver_int -ge 30000 ]];then
-    buildrequires+=(python3-dev)
-  else
-    buildrequires+=(python-dev)
-  fi
+  buildrequires=(gcc libssl-dev libffi-dev libgmp-dev python3-dev)
   if [[ -n ${ANSIBLE_INSTALL_LOCAL_INSTALL_BUILDREQUIRES-} ]]; then
     $sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes "${buildrequires[@]}" || exit $?
   fi
@@ -159,10 +152,8 @@ redhat|almalinux|rocky|centos|fedora)
   buildrequires=(gcc openssl-devel libffi-devel gmp-devel)
   if [[ ${python##*/} == platform-python && $OS_VERSION_MAJOR -eq 8 ]]; then
     buildrequires+=(platform-python-devel)
-  elif [[ $python_ver_int -ge 30000 ]];then
-    buildrequires+=(python3-devel)
   else
-    buildrequires+=(python-devel)
+    buildrequires+=(python3-devel)
   fi
   if [[ -n ${ANSIBLE_INSTALL_LOCAL_INSTALL_BUILDREQUIRES-} ]]; then
     $sudo yum install --assumeyes "${buildrequires[@]}" || exit $?
