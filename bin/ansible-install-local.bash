@@ -72,7 +72,7 @@ EOF
 python_modules_pre=()
 if ! "$python" -m wheel --help >/dev/null 2>&1; then
   python_modules_pre+=(
-    wheel${wheel_version-}
+    "wheel${wheel_version-}"
   )
 fi
 
@@ -81,19 +81,18 @@ if [[ $python_ver_int -lt 30800 && -z ${ansible_version-} ]];then
 fi
 
 python_modules=(
-  ansible${ansible_version-}
-  ansible-core${ansible_core_version-}
-  pyyaml${pyyaml_version-}
-  jinja2${jinja2_version-}
+  "ansible${ansible_version-}"
+  "ansible-core${ansible_core_version-}"
+  "pyyaml${pyyaml_version-}"
+  "jinja2${jinja2_version-}"
   ## cryptography 3.4+ requires Rust compiler
-  cryptography${cryptography_version-}${cryptography_version:-<3.4}
-  httplib2${httplib2_version-}
-  six${six_version-}
-  netaddr${netaddr_version-}
-  jmespath${jmespath_version-}
-  xmltodict${xmltodict_version-}
-  #paramiko${paramiko_version-}
-  pywinrm${pywinrm_version-}
+  "cryptography${cryptography_version-}${cryptography_version:-<3.4}"
+  "httplib2${httplib2_version-}"
+  "six${six_version-}"
+  "netaddr${netaddr_version-}"
+  "jmespath${jmespath_version-}"
+  "xmltodict${xmltodict_version-}"
+  "pywinrm${pywinrm_version-}"
   "$@"
 )
 
