@@ -87,12 +87,12 @@ python_modules=(
   jinja2${jinja2_version-}
   ## cryptography 3.4+ requires Rust compiler
   cryptography${cryptography_version-}${cryptography_version:-<3.4}
-  paramiko${paramiko_version-}
   httplib2${httplib2_version-}
   six${six_version-}
   netaddr${netaddr_version-}
   jmespath${jmespath_version-}
   xmltodict${xmltodict_version-}
+  #paramiko${paramiko_version-}
   pywinrm${pywinrm_version-}
   "$@"
 )
