@@ -103,7 +103,7 @@ else
 fi
 
 sshpass_src_base_url="https://sourceforge.net/projects/sshpass/files/sshpass"
-sshpass_version="${sshpass_version:-1.09}"
+sshpass_version="${sshpass_version:-1.10}"
 
 if [[ $(id -u) -eq 0 ]]; then
   sudo=
