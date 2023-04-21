@@ -269,7 +269,13 @@ fi
 if ! "$python" -m pip help >&/dev/null; then
   v "Getting get-pip.py ..."
   if type curl >&/dev/null; then
-    curl --output get-pip.py "$get_pip_url" || exit $?
+    curl \
+      --silent \
+      --show-error \
+      --location \
+      --output get-pip.py \
+      "$get_pip_url" \
+    || exit $?
   else
     wget --quiet --timestamping "$get_pip_url" || exit $?
   fi
