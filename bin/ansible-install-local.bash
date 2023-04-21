@@ -237,7 +237,7 @@ else
       rmdir ./usr/bin ./usr || exit $?
       rm -f sshpass-[0-9]*.rpm || exit $?
     else
-      v "Checking curl and make commands to build ssh pass binary ..."
+      v "Checking curl and make commands to build sshpass binary ..."
       type curl || exit $?
       type make || exit $?
       v "Building sshpass binary from source archive ..."
