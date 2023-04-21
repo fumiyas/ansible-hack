@@ -224,14 +224,14 @@ else
     rmdir ./usr/bin ./usr
     ;;
   redhat|almalinux|rocky|centos|fedora)
-    if [[ $OS_VERSION_MAJOR -ne 8 ]] || [[ $OS_ID == fedora ]]; then
-      v "Downloading sshpass binary in *.rpm package ..."
-      rm -f sshpass-[0-9]*.rpm || exit $?
-      if type dnf >/dev/null 2>&1; then
-        dnf download sshpass || exit $?
-      else
-        yumdownloader --disablerepo=\* --enablerepo=extras sshpass || exit $?
-      fi
+    v "Downloading sshpass binary in *.rpm package ..."
+    rm -f sshpass-[0-9]*.rpm || exit $?
+    if type dnf >/dev/null 2>&1; then
+      dnf download sshpass
+    else
+      yumdownloader --disablerepo=\* --enablerepo=extras sshpass
+    fi
+    if [[ $? -eq 0 ]]; then
       rpm2cpio sshpass-[0-9]*.rpm |cpio -id ./usr/bin/sshpass || exit $?
       mv ./usr/bin/sshpass ./ || exit $?
       rmdir ./usr/bin ./usr || exit $?
