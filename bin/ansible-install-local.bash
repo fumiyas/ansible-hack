@@ -1,7 +1,7 @@
 #!/bin/bash
 ##
 ## Ansible: Setup user's local Ansible environment
-## Copyright (c) 2017-2021 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Copyright (c) 2017-2023 SATOH Fumiyasu @ OSSTech Corp., Japan
 ##
 ## License: GNU General Public License version 3
 ##
