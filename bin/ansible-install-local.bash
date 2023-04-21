@@ -228,7 +228,7 @@ else
       v "Downloading sshpass binary in *.rpm package ..."
       rm -f sshpass-[0-9]*.rpm || exit $?
       if type dnf >/dev/null 2>&1; then
-        dnf install --assumeyes --downloadonly --downloaddir=. sshpass || exit $?
+        dnf download sshpass || exit $?
       else
         yumdownloader --disablerepo=\* --enablerepo=extras sshpass || exit $?
       fi
